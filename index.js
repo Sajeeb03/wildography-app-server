@@ -15,11 +15,19 @@ const client = new MongoClient(uri);
 const dbConnect = async () => {
     try {
         await client.connect();
-        console.log(db)
+        console.log('db Connected')
     } catch (error) {
-
+        console.log(error)
     }
 }
+
+dbConnect();
+
+const Services = client.db('wildography').collection('services');
+app.post('/services', async (req, res) => {
+    const result = await Services.insertOne(req.body);
+    res.send(result)
+})
 app.get('/', (req, res) => {
     res.send('Server is on')
 })
