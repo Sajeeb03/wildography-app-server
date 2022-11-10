@@ -1,11 +1,31 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+
+// verifyjwt
+
+const verifyJwt = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send({ message: "Unauthorized Access" })
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECURE, (err, decoded) => {
+        if (err) {
+            return res.status(403).send({ message: "Unauthorized Access" })
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
+
 
 const port = process.env.PORT;
 
@@ -24,10 +44,22 @@ const dbConnect = async () => {
 dbConnect();
 
 const Services = client.db('wildography').collection('services');
-const Reviews = client.db("wildography").collection('reviews')
+const Reviews = client.db("wildography").collection('reviews');
+
 app.post('/services', async (req, res) => {
-    const result = await Services.insertOne(req.body);
-    res.send(result)
+    try {
+        const result = await Services.insertOne(req.body);
+        res.send({
+            success: true,
+            message: "Posted"
+        })
+
+    } catch (error) {
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
 })
 
 //get the services to the client home page
@@ -96,7 +128,7 @@ app.post('/reviews', async (req, res) => {
 
 
 //get reviews
-app.get('/reviews', async (req, res) => {
+app.get('/reviews', verifyJwt, async (req, res) => {
     try {
         // const service = req.query;
 
@@ -162,7 +194,26 @@ app.patch("/reviews/:id", async (req, res) => {
         })
     }
 })
+//jwt token 
 
+app.post("/jwt", async (req, res) => {
+    try {
+        const user = req.body;
+
+        const secret = process.env.SECURE;
+
+        const token = jwt.sign(user, process.env.SECURE, { expiresIn: "10d" })
+        res.send({
+            success: true,
+            data: token
+        })
+    } catch (error) {
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
 
 //the root api
 app.get('/', (req, res) => {
