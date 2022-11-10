@@ -17,7 +17,7 @@ const verifyJwt = (req, res, next) => {
         return res.status(401).send({ message: "Unauthorized Access" })
     }
     const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECURE, (err, decoded) => {
+    jwt.verify(token, process.env.SECURE, (err, decoded) => {
         if (err) {
             return res.status(403).send({ message: "Unauthorized Access" })
         }
@@ -65,7 +65,7 @@ app.post('/services', async (req, res) => {
 //get the services to the client home page
 app.get('/services/home', async (req, res) => {
     try {
-        const result = await Services.find({}).limit(3).toArray();
+        const result = await Services.find({}).sort({ _id: -1 }).limit(3).toArray();
         res.send({
             success: true,
             message: "successful",
@@ -132,7 +132,7 @@ app.get('/reviews', verifyJwt, async (req, res) => {
     try {
         // const service = req.query;
 
-        const result = await Reviews.find(req.query).toArray();
+        const result = await Reviews.find(req.query).sort({ time: -1 }).toArray();
         res.send({
             success: true,
             data: result
