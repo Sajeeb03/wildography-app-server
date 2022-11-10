@@ -24,6 +24,7 @@ const dbConnect = async () => {
 dbConnect();
 
 const Services = client.db('wildography').collection('services');
+const Reviews = client.db("wildography").collection('reviews')
 app.post('/services', async (req, res) => {
     const result = await Services.insertOne(req.body);
     res.send(result)
@@ -69,6 +70,22 @@ app.get('/services/:id', async (req, res) => {
         res.send({
             success: true,
             data: result
+        })
+    } catch (error) {
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+app.post('/reviews', async (req, res) => {
+    try {
+        const result = await Reviews.insertOne(req.body);
+        const data = await Reviews.find({}).toArray();
+        res.send({
+            success: true,
+            data: data,
         })
     } catch (error) {
         res.send({
