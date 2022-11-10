@@ -78,14 +78,13 @@ app.get('/services/:id', async (req, res) => {
         })
     }
 })
-
+//post review
 app.post('/reviews', async (req, res) => {
     try {
         const result = await Reviews.insertOne(req.body);
-        const data = await Reviews.find({}).toArray();
         res.send({
             success: true,
-            data: data,
+            message: "Review added"
         })
     } catch (error) {
         res.send({
@@ -94,6 +93,42 @@ app.post('/reviews', async (req, res) => {
         })
     }
 })
+
+
+//get reviews
+app.get('/reviews', async (req, res) => {
+    try {
+        // const service = req.query;
+
+        const result = await Reviews.find(req.query).toArray();
+        res.send({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
+//review deletion
+app.delete("/reviews/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await Reviews.deleteOne({ _id: ObjectId(id) })
+        res.send({
+            success: true,
+            message: "Item removed"
+        })
+    } catch (error) {
+        res.send({
+            success: false,
+            message: error.message
+        })  
+    }
+})
+
 
 //the root api
 app.get('/', (req, res) => {
