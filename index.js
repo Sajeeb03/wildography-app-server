@@ -112,6 +112,24 @@ app.get('/reviews', async (req, res) => {
         })
     }
 })
+
+//find review by id
+app.get('/reviews/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const result = await Reviews.findOne({ _id: ObjectId(id) });
+        res.send({
+            success: true,
+            data: result
+        })
+    } catch (error) {
+        res.send({
+            success: false,
+            message: error.message
+        })
+    }
+})
 //review deletion
 app.delete("/reviews/:id", async (req, res) => {
     try {
@@ -126,6 +144,22 @@ app.delete("/reviews/:id", async (req, res) => {
             success: false,
             message: error.message
         })  
+    }
+})
+//update
+app.patch("/reviews/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await Reviews.updateOne({ _id: ObjectId(id) }, { $set: req.body })
+        res.send({
+            success: true,
+            message: "Updated"
+        })
+    } catch (error) {
+        res.send({
+            success: false,
+            message: error.message
+        })
     }
 })
 
